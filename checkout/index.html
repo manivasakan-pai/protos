@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkout full screen</title>
+<!-- Static copy of the app's checkout popup, both columns: the "Upgrade to Pro" summary (CheckoutSummaryV2) on the
+     left and the card payment form (PaymentMethodOption.jsx, Chargebee panel) on the right. Built from the QA captures
+     of 29 October 2026 (payment form) and the pricing pass (i4 checkout). US buyer, so dollars and no UPI tab.
+     Price from the 2 November 2026 price sheet: Pro $240 a year, no offer. No payment calls. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<script>
+  // Scroll option: ?scroll=side (default) caps the popup to the window and scrolls only the payment column;
+  // ?scroll=page lets the popup run its full height and the page scroll behind it.
+  document.documentElement.dataset.scroll = new URLSearchParams(location.search).get("scroll") === "page" ? "page" : "side";
+</script>
+<style>
+  :root {
+    --scrim: #848399;
+    --surface: #FFFFFF;
+    --left-bg: #F8F8FA;
+    --ink: #14141F;
+    --body: #43424A;
+    --label: #4E4E5E;
+    --muted: #6C6C7C;
+    --soft: #756F73;
+    --placeholder: #8E8E9C;
+    --line: #E4E4EC;
+    --line-card: #E9E9EA;
+    --divider: #E8E8E8;
+    --star: #B91C1C;
+    --brand: #0D99FF; /* Figma blue: pai bg-brand */
+    --brand-hover: #007BE5; /* pai bg-brand-hover */
+    --brand-fg: #007BE5; /* pai text-brand / border-brand: links, focus borders */
+    --brand-ring: rgba(13, 153, 255, 0.2); /* pai ring-bg-brand/20 */
+    --save: #15803D;
+    --shadow-xs: 0 1px 2px 0 rgba(16, 24, 40, 0.05);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    background: var(--scrim);
+    font-family: Inter, -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px 16px;
+  }
+
+  /* Popup: summary 486px + payment 595px, as in the app, capped to the window.
+     Two scroll options to test: data-scroll="side" (default) caps the popup to the window and scrolls only the payment
+     column; data-scroll="page" shows the popup at full height and the page scrolls. Pay sticks to the bottom in both. */
+  .shell {
+    position: relative;
+    width: 100%; max-width: 1081px; min-width: 0;
+    max-height: calc(100vh - 40px);
+    display: flex; flex-direction: column;
+    background: var(--surface);
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.08), 0 24px 64px -12px rgba(0, 0, 0, 0.28);
+  }
+  .modal { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .row { flex: 1 1 auto; min-height: 0; display: flex; }
+  /* Columns that scroll show a thin thumb only: no track, no gutter colour. */
+  .left, .right { scrollbar-width: thin; scrollbar-color: rgba(20, 20, 31, 0.22) transparent; }
+  .left::-webkit-scrollbar, .right::-webkit-scrollbar { width: 8px; background: transparent; }
+  .left::-webkit-scrollbar-track, .right::-webkit-scrollbar-track { background: transparent; }
+  .left::-webkit-scrollbar-thumb, .right::-webkit-scrollbar-thumb { background-color: rgba(20, 20, 31, 0.22); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+  .left::-webkit-scrollbar-thumb:hover, .right::-webkit-scrollbar-thumb:hover { background-color: rgba(20, 20, 31, 0.36); }
+
+  /* Page option: no cap, nothing clips (so Pay can stick to the window), the left column carries its own corners. */
+  html[data-scroll="page"] .shell { max-height: none; overflow: visible; margin: auto 0; }
+  html[data-scroll="page"] .row { flex: none; }
+  html[data-scroll="page"] .left, html[data-scroll="page"] .right { overflow: visible; }
+  html[data-scroll="page"] .left { border-radius: 16px 0 0 16px; }
+
+  /* ---------- Left: order summary ---------- */
+  .left {
+    background: var(--left-bg);
+    border-right: 1px solid var(--divider);
+    flex: 486 1 0; min-width: 0;
+    padding: 36px 32px 34px 33px;
+    display: flex; flex-direction: column;
+    min-height: 0; overflow-y: auto;
+  }
+  .left h1 { margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
+  .plan-card {
+    margin-top: 20px;
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 14px 16px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line); border-radius: 8px;
+  }
+  .pc-name { display: flex; align-items: center; gap: 5px; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink); }
+  .pc-name i { font-size: 15px; }
+  .pc-desc { margin-top: 2px; max-width: 240px; font-size: 13px; line-height: 18px; color: var(--label); }
+  .pc-right { text-align: right; flex: none; }
+  .pc-price { display: flex; align-items: baseline; justify-content: flex-end; gap: 6px; white-space: nowrap; }
+  .pc-price s { font-size: 13px; color: #707070; }
+  .pc-price b { font-size: 20px; line-height: 26px; font-weight: 600; color: var(--ink); }
+  .pc-price span { font-size: 13px; color: #887D83; }
+  .pc-save { margin-top: 2px; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--save); }
+
+  .feats { list-style: none; margin: 16px 0 0; padding: 0; }
+  .feats li { display: flex; align-items: center; gap: 10px; height: 30px; font-size: 14px; color: var(--body); }
+  .feats li i { font-size: 16px; color: #6E6E70; width: 16px; flex: none; }
+  .feats li.credits i { color: var(--ink); }
+  .feats b { font-weight: 600; color: var(--ink); }
+
+  /* App: text-micro (12/16, 0.01em), text-gray-500 (#7F7F7F), gap-x-3, icons h-3.5 with gap-1. */
+  .trust {
+    margin-top: auto; padding-top: 28px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px;
+    font-size: 12px; line-height: 16px; letter-spacing: 0.01em; color: #7F7F7F;
+  }
+  .trust span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .trust .t-heart { width: 14px; height: 14px; flex: none; }
+  .trust .t-badge { height: 14px; width: auto; flex: none; object-fit: contain; }
+
+  /* ---------- Right: payment form ---------- */
+  .right { position: relative; flex: 595 1 0; min-width: 0; min-height: 0; overflow-y: auto; padding: 34px 33px 36px; }
+  .close {
+    position: absolute; top: 18px; right: 18px; z-index: 5;
+    width: 32px; height: 32px; border: 0; border-radius: 6px;
+    display: grid; place-items: center;
+    background: transparent; color: var(--label); cursor: pointer;
+    transition: background-color .15s ease, box-shadow .15s ease;
+  }
+  .close:hover { background: #F2F2F6; }
+  /* Once content scrolls under it, the close button floats on a white disc. */
+  .shell.is-scrolled .close { background: var(--surface); border-radius: 999px; box-shadow: 0 0 0 1px var(--line), 0 1px 2px rgba(16, 24, 40, 0.06); }
+  .shell.is-scrolled .close:hover { background: #F2F2F6; }
+  .close i { font-size: 18px; }
+  .overline {
+    margin: 0 0 18px;
+    font-size: 12px; line-height: 16px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+  .field label, .field .label { font-size: 14px; line-height: 20px; font-weight: 500; color: var(--label); }
+  .star { color: var(--star); margin-left: 3px; }
+  .control {
+    height: 36px; width: 100%;
+    display: flex; align-items: center; gap: 8px; padding: 0 12px;
+    background: var(--surface);
+    border: 1px solid var(--line); border-radius: 6px; box-shadow: var(--shadow-xs);
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .control:hover:not(:focus-within) { border-color: #C9C9D6; }
+  .control:focus-within { border-color: var(--brand-fg); box-shadow: 0 0 0 2px var(--brand-ring); }
+  .control input, .control select {
+    flex: 1; min-width: 0; height: 100%;
+    border: 0; outline: 0; background: transparent; padding: 0;
+    font-family: inherit; font-size: 14px; line-height: 20px; color: var(--ink);
+  }
+  .control input::placeholder { color: var(--placeholder); }
+
+  /* Chrome autofill paints filled fields light blue; keep them white like every other field. */
+  input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active,
+  select:-webkit-autofill, select:-webkit-autofill:hover, select:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
+    box-shadow: 0 0 0 1000px var(--surface) inset;
+    -webkit-text-fill-color: var(--ink);
+    caret-color: var(--ink);
+    transition: background-color 9999s ease-out 0s;
+  }
+  input:autofill, select:autofill { background-color: var(--surface); }
+  .control select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 22px; }
+  .control select:disabled { cursor: default; color: var(--placeholder); }
+  .select { position: relative; }
+  .select i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--ink); pointer-events: none; }
+
+  .card-box { border: 1px solid var(--line-card); border-radius: 6px; overflow: hidden; box-shadow: var(--shadow-xs); }
+  .card-box:focus-within { border-color: var(--brand-fg); box-shadow: 0 0 0 2px var(--brand-ring); }
+  .card-row { display: flex; align-items: center; height: 36.5px; padding: 0 12px; gap: 8px; }
+  .card-split { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line-card); }
+  .card-split .card-row + .card-row { border-left: 1px solid var(--line-card); }
+  .card-row input {
+    flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; padding: 0;
+    font-family: inherit; font-size: 14px; line-height: 20px; color: var(--ink); letter-spacing: 0.02em;
+  }
+  .card-row input::placeholder { color: var(--placeholder); }
+  .brands { display: flex; gap: 4px; flex: none; }
+  .brands img, .cvc img { width: 24px; height: 16px; display: block; }
+
+  /* "I'm purchasing as a business": off by default; ticking it opens the business details below. */
+  .opt { font-weight: 400; color: var(--muted); }
+  .check {
+    display: inline-flex; align-items: center; gap: 10px; width: fit-content;
+    font-size: 14px; line-height: 20px; color: var(--ink); cursor: pointer; user-select: none;
+  }
+  .check input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+  .check .box {
+    width: 18px; height: 18px; flex: none; border-radius: 4px;
+    border: 1.5px solid #8E8E9C; background: var(--surface);
+    display: grid; place-items: center; color: #fff;
+    transition: background-color .15s ease, border-color .15s ease;
+  }
+  .check .box i { font-size: 12px; opacity: 0; transform: scale(.6); transition: opacity .15s ease, transform .15s ease; }
+  .check:hover .box { border-color: var(--label); }
+  .check input:checked + .box { background: var(--ink); border-color: var(--ink); }
+  .check input:checked + .box i { opacity: 1; transform: none; }
+  .check input:focus-visible + .box { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--brand); }
+  .biz-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .25s ease; }
+  .biz-panel.is-open { grid-template-rows: 1fr; }
+  .biz-inner { min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 16px; }
+  .biz-panel.is-open .biz-inner { padding-top: 12px; }
+  .biz-note { margin: 0; font-size: 12px; line-height: 16px; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .biz-panel, .check .box, .check .box i { transition: none; } }
+  .pay {
+    margin-top: 8px; height: 44px; width: 100%; border: 0; border-radius: 6px;
+    background: var(--brand); color: #fff;
+    font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;
+  }
+  .pay:hover { background: var(--brand-hover); }
+  .pay:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  /* Short window: the column scrolls and Pay sticks to its bottom on a white glow (the app's stickyPayButton). */
+  /* Pay sticks 16px above the popup's bottom edge, on a white band that hides what scrolls under it.
+     The side scroller has 36px bottom padding, which sticky respects, hence the negative inset there. */
+  .right.is-scroll .pay { position: sticky; z-index: 3; box-shadow: 0 0 0 16px #fff, 0 -24px 16px -4px rgba(255, 255, 255, 0.96); }
+  html[data-scroll="page"] .right.is-scroll .pay { bottom: 16px; }
+  html[data-scroll="side"] .right.is-scroll .pay { bottom: -20px; }
+
+  .consent { margin: 0; font-size: 12px; line-height: 16px; color: var(--label); }
+  .consent a { color: var(--brand-fg); text-decoration: none; }
+  .consent a:hover { text-decoration: underline; }
+  .reach {
+    display: flex; align-items: center; padding: 10px 12px 10px 10px;
+    border: 1px solid var(--line); border-radius: 4px; box-shadow: var(--shadow-xs);
+  }
+  .reach img { width: 91px; height: 16px; flex: none; }
+  .reach .vr { width: 1px; height: 40px; background: var(--line); margin: 0 12px 0 11px; flex: none; }
+  .reach p { margin: 0; font-size: 10px; line-height: 16px; color: #515161; }
+  .reach a { color: inherit; text-decoration: none; }
+  .reach a:hover { text-decoration: underline; }
+
+  /* Narrow window: one column, summary on top, the page scrolls. */
+  @media (max-width: 860px) {
+    body { align-items: flex-start; }
+    .shell { max-height: none; overflow: visible; }
+    html[data-scroll] .modal { overflow: visible; }
+    .row, html[data-scroll] .row { flex: none; flex-direction: column; }
+    .left, .right { flex: none; }
+    .left { border-right: 0; border-bottom: 1px solid var(--divider); border-radius: 16px 16px 0 0; overflow: visible; }
+    .right { overflow: visible; }
+    .trust { padding-top: 20px; }
+  }
+  @media (max-width: 520px) {
+    .left, .right { padding-left: 16px; padding-right: 16px; }
+    .left { padding-top: 28px; padding-bottom: 24px; }
+    .right { padding-top: 28px; padding-bottom: 24px; }
+    .row-2 { grid-template-columns: 1fr; gap: 16px; }
+    .plan-card { flex-direction: column; }
+    .pc-right { text-align: left; }
+    .pc-price { justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell" role="dialog" aria-modal="true" aria-labelledby="co-title">
+  <button class="close" type="button" aria-label="Close"><i class="ph ph-x"></i></button>
+  <div class="modal" id="scroller">
+  <div class="row">
+
+  <aside class="left">
+    <h1 id="co-title">Upgrade to Pro</h1>
+
+    <div class="plan-card">
+      <div>
+        <div class="pc-name">Pro <i class="ph ph-rocket-launch"></i></div>
+        <div class="pc-desc">Build presentations with advanced AI and your brand</div>
+      </div>
+      <div class="pc-right">
+        <div class="pc-price"><b>$240</b><span>/ yr</span></div>
+      </div>
+    </div>
+
+    <ul class="feats">
+      <li class="credits"><i class="ph-fill ph-sparkle"></i><span><b>8,000</b> credits a year</span></li>
+      <li><i class="ph ph-sparkle"></i>Advanced AI models and agents</li>
+      <li><i class="ph ph-paint-roller"></i>Full Brand Kit</li>
+      <li><i class="ph ph-path"></i>Research and planning tools</li>
+      <li><i class="ph ph-chart-bar"></i>Presentation analytics</li>
+      <li><i class="ph ph-lightning"></i>Everything in Basic</li>
+    </ul>
+
+    <!-- Same icons as the app's checkout trust line (OrderSummaryV2): Heroicons outline heart, payment/badge-gdpr-gray.png,
+         payment/badge-soc2-gray.png. -->
+    <div class="trust">
+      <span><svg class="t-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>Used by 12M+ presenters</span>
+      <span><img class="t-badge" src="assets/er/badge-gdpr-gray.png" alt="">GDPR compliant</span>
+      <span><img class="t-badge" src="assets/er/badge-soc2-gray.png" alt="">SOC 2 Type II</span>
+    </div>
+  </aside>
+
+  <section class="right" id="pay-col">
+    <p class="overline">Payment method</p>
+
+    <form class="stack" onsubmit="return false" autocomplete="on">
+      <div class="row-2">
+        <div class="field">
+          <label for="f-first">Your first name<span class="star">*</span></label>
+          <div class="control"><input id="f-first" name="given-name" autocomplete="given-name" value="Manivasakan"></div>
+        </div>
+        <div class="field">
+          <label for="f-last">Your last name<span class="star">*</span></label>
+          <div class="control"><input id="f-last" name="family-name" autocomplete="family-name" value="Jayaprakash"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="label">Card information</span>
+        <div class="card-box">
+          <div class="card-row">
+            <input aria-label="Card number" inputmode="numeric" autocomplete="off" placeholder="1234 1234 1234 1234" maxlength="19" data-mask="card">
+            <span class="brands">
+              <img src="assets/er/visa.svg" alt="Visa">
+              <img src="assets/er/mastercard.svg" alt="Mastercard">
+              <img src="assets/er/amex.svg" alt="American Express">
+              <img src="assets/er/jcb.svg" alt="JCB">
+            </span>
+          </div>
+          <div class="card-split">
+            <div class="card-row"><input aria-label="Expiry date" inputmode="numeric" autocomplete="off" placeholder="MM / YY" maxlength="7" data-mask="exp"></div>
+            <div class="card-row">
+              <input aria-label="CVC" inputmode="numeric" autocomplete="off" placeholder="CVC" maxlength="4">
+              <span class="cvc"><img src="assets/er/cvc123.svg" alt=""></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label for="f-country">Country<span class="star">*</span></label>
+          <div class="control select">
+            <select id="f-country" name="country" autocomplete="billing country"></select>
+            <i class="ph ph-caret-down"></i>
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-zip" id="l-zip">ZIP code<span class="star">*</span></label>
+          <div class="control"><input id="f-zip" name="postal-code" autocomplete="billing postal-code" placeholder="ZIP code"></div>
+        </div>
+      </div>
+
+      <div class="biz">
+        <label class="check" for="f-biz">
+          <input type="checkbox" id="f-biz" aria-controls="biz-panel" aria-expanded="false">
+          <span class="box" aria-hidden="true"><i class="ph-bold ph-check"></i></span>
+          I&rsquo;m purchasing as a business
+        </label>
+
+        <div class="biz-panel" id="biz-panel" inert>
+          <div class="biz-inner">
+            <p class="biz-note">This information will be displayed on your invoice and used to calculate taxes.</p>
+
+            <div class="field">
+              <label for="b-name">Business name<span class="star">*</span></label>
+              <div class="control"><input id="b-name" autocomplete="organization" placeholder="Business name"></div>
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="b-country">Country<span class="star">*</span></label>
+                <div class="control select">
+                  <select id="b-country" autocomplete="shipping country"></select>
+                  <i class="ph ph-caret-down"></i>
+                </div>
+              </div>
+              <div class="field">
+                <label for="b-zip" id="l-bzip">ZIP code<span class="star">*</span></label>
+                <div class="control"><input id="b-zip" autocomplete="shipping postal-code" placeholder="ZIP code"></div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="b-addr1">Address line 1<span class="star">*</span></label>
+              <div class="control"><input id="b-addr1" autocomplete="shipping address-line1" placeholder="Building, street"></div>
+            </div>
+            <div class="field">
+              <label for="b-addr2">Address line 2 <span class="opt">(optional)</span></label>
+              <div class="control"><input id="b-addr2" autocomplete="shipping address-line2" placeholder="Floor, suite, area"></div>
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="b-city">City<span class="star">*</span></label>
+                <div class="control"><input id="b-city" autocomplete="shipping address-level2" placeholder="City"></div>
+              </div>
+              <div class="field">
+                <label for="b-state" id="l-bstate">State<span class="star">*</span></label>
+                <div class="control select" id="b-state-ctl"></div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="b-tax" id="l-btax">Business tax ID<span class="star">*</span></label>
+              <div class="control"><input id="b-tax" maxlength="20" placeholder="GSTIN / VAT number"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="pay" type="button">Pay</button>
+
+      <p class="consent">By continuing, you agree to the <a href="#" onclick="return false">Terms of Service</a>, <a href="#" onclick="return false">Refund Policy</a>, Cancellation Policy, and authorize presentations.ai to automatically charge my payment method for renewals. You can cancel anytime.</p>
+
+      <div class="reach">
+        <img src="assets/er/reachlogo.svg" alt="Reach">
+        <span class="vr"></span>
+        <p>By completing your order, you will check out with our preferred international seller Reach US, CA, UK, EU, JP, or AU and agree to the <a href="#" onclick="return false">Terms of Service</a> of Reach</p>
+      </div>
+    </form>
+  </section>
+  </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var STATES = {
+      "United States": ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","District of Columbia","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"],
+      "India": ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Delhi","Goa","Gujarat","Haryana","Himachal Pradesh","Jammu and Kashmir","Jharkhand","Karnataka","Kerala","Ladakh","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Puducherry","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal"]
+    };
+    var COUNTRIES = ["United States","India","United Kingdom","Canada","Australia","Germany","France","Japan","Singapore","United Arab Emirates"];
+    var $ = function (id) { return document.getElementById(id); };
+    var STAR = '<span class="star">*</span>';
+    var postal = function (c) { return c === "India" ? "PIN code" : c === "United States" ? "ZIP code" : "Postal code"; };
+
+    var topCountry = $("f-country"), topZip = $("f-zip");
+    var bCountry = $("b-country"), bZip = $("b-zip"), bTax = $("b-tax");
+    COUNTRIES.forEach(function (c) { topCountry.add(new Option(c, c)); bCountry.add(new Option(c, c)); });
+
+    // The business country and PIN code start as the card's; they stop following once edited.
+    var bCountryEdited = false, bZipEdited = false;
+
+    function syncTop() {
+      $("l-zip").innerHTML = postal(topCountry.value) + STAR;
+      topZip.placeholder = postal(topCountry.value);
+      if (!bCountryEdited) { bCountry.value = topCountry.value; syncBiz(); }
+      if (!bZipEdited && bCountry.value === topCountry.value) bZip.value = topZip.value;
+    }
+    function syncBiz() {
+      var c = bCountry.value, list = STATES[c], ctl = $("b-state-ctl");
+      $("l-bzip").innerHTML = postal(c) + STAR;
+      bZip.placeholder = postal(c);
+      if (list) {
+        $("l-bstate").innerHTML = "State" + STAR;
+        ctl.className = "control select";
+        ctl.innerHTML = '<select id="b-state" autocomplete="shipping address-level1"><option value="">State</option>' +
+          list.map(function (s) { return '<option>' + s + '</option>'; }).join("") + '</select><i class="ph ph-caret-down"></i>';
+      } else {
+        $("l-bstate").innerHTML = 'State or region <span class="opt">(optional)</span>';
+        ctl.className = "control";
+        ctl.innerHTML = '<input id="b-state" autocomplete="shipping address-level1" placeholder="State or region">';
+      }
+    }
+    topCountry.addEventListener("change", syncTop);
+    topZip.addEventListener("input", function () { if (!bZipEdited && bCountry.value === topCountry.value) bZip.value = topZip.value; });
+    bCountry.addEventListener("change", function () { bCountryEdited = true; syncBiz(); });
+    bZip.addEventListener("input", function () { bZipEdited = true; });
+    bTax.addEventListener("input", function () { if (bCountry.value === "India") bTax.value = bTax.value.toUpperCase().replace(/\s/g, ""); });
+    syncBiz(); syncTop();
+
+    // Business details open below the checkbox; closed, they are out of the tab order (inert).
+    var biz = $("f-biz"), panel = $("biz-panel");
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    biz.addEventListener("change", function () {
+      var on = biz.checked;
+      panel.classList.toggle("is-open", on);
+      panel.inert = !on;
+      biz.setAttribute("aria-expanded", String(on));
+      if (on) setTimeout(function () { panel.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" }); }, reduce ? 0 : 260);
+    });
+
+    document.querySelectorAll("[data-mask=card]").forEach(function (el) {
+      el.addEventListener("input", function () { el.value = el.value.replace(/\D/g, "").slice(0, 16).replace(/(\d{4})(?=\d)/g, "$1 "); });
+    });
+    document.querySelectorAll("[data-mask=exp]").forEach(function (el) {
+      el.addEventListener("input", function () {
+        var d = el.value.replace(/\D/g, "").slice(0, 4);
+        el.value = d.length > 2 ? d.slice(0, 2) + " / " + d.slice(2) : d;
+      });
+    });
+
+    // Sticky Pay only while something scrolls: the page (page option) or the payment column (side option).
+    var col = $("pay-col"), box = $("scroller");
+    function checkScroll() {
+      var over = document.documentElement.dataset.scroll === "side"
+        ? col.scrollHeight > col.clientHeight + 1
+        : document.documentElement.scrollHeight > window.innerHeight + 1;
+      col.classList.toggle("is-scroll", over);
+    }
+    window.addEventListener("resize", checkScroll);
+    var shell = document.querySelector(".shell");
+    function checkScrolled() { shell.classList.toggle("is-scrolled", box.scrollTop > 0 || col.scrollTop > 0); }
+    box.addEventListener("scroll", checkScrolled, { passive: true });
+    col.addEventListener("scroll", checkScrolled, { passive: true });
+    if (window.ResizeObserver) new ResizeObserver(checkScroll).observe(col.querySelector("form"));
+    checkScroll();
+  })();
+</script>
+
+</body>
+</html>
