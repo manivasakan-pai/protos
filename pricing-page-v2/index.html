@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pricing page v2</title>
+<style>
+:root{
+  --surface:#FFFFFF;--canvas:#F5F5F5;--sunken:#F5F5F5;--sunken2:#E6E6E6;--line:#E6E6E6;--ink:26 26 26;--ink2:#7F7F7F;
+  --brand:#0D99FF;--brand-hover:#007BE5;--brand-fg:#007BE5;--tint:#E5F4FF;--tint-40:rgb(229 244 255/.4);--tint-60:rgb(229 244 255/.6);
+  --good:#009951;--bad:#DC3412;--edge:rgb(var(--ink)/.3);
+  --shadow-menu:0 1px 2px 0 rgb(0 0 0/.06),0 8px 24px -6px rgb(0 0 0/.16);
+  --shadow-dialog:0 2px 6px 0 rgb(0 0 0/.08),0 24px 64px -12px rgb(0 0 0/.28);
+  --glass:rgb(255 255 255/.9);--ease:cubic-bezier(.2,0,0,1);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --surface:#2C2C2C;--canvas:#1E1E1E;--sunken:#383838;--sunken2:#444444;--line:#444444;--ink:255 255 255;--ink2:#BFBFBF;
+  --brand:#0C8CE9;--brand-hover:#0A6DC2;--brand-fg:#7CC4F8;--tint:#394360;--tint-40:rgb(57 67 96/.4);--tint-60:rgb(57 67 96/.6);
+  --good:#7CD797;--bad:#FCA397;
+  --shadow-menu:0 1px 2px 0 rgb(0 0 0/.4),0 8px 24px -6px rgb(0 0 0/.6);
+  --shadow-dialog:0 2px 6px 0 rgb(0 0 0/.4),0 24px 64px -12px rgb(0 0 0/.7);
+  --glass:rgb(44 44 44/.9);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--canvas);color:rgb(var(--ink));font:14px/20px -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+p,h2,h3,h4,figure,blockquote{margin:0}
+svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+svg.i.l{width:20px;height:20px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
+
+/* Type */
+.t-display{font-size:32px;line-height:40px;letter-spacing:-.02em;font-weight:600}
+.t-title{font-size:24px;line-height:32px;letter-spacing:-.015em;font-weight:600}
+.t-heading{font-size:18px;line-height:26px;letter-spacing:-.005em;font-weight:600}
+.t-body-lg{font-size:16px;line-height:24px}
+.t-caption{font-size:13px;line-height:18px}
+.t-micro{font-size:12px;line-height:16px;letter-spacing:.01em}
+.muted{color:var(--ink2)}
+.eyebrow{font-size:12px;line-height:16px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2)}
+.num{font-variant-numeric:tabular-nums}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 14px;border-radius:6px;font-weight:500;white-space:nowrap;transition:background .15s var(--ease),border-color .15s var(--ease)}
+.btn.lg{height:44px;padding:0 20px;width:100%}
+.btn.sm{height:32px;padding:0 12px;font-size:13px;gap:6px}
+.btn.pri{background:var(--brand);color:#fff;box-shadow:0 1px 0 rgb(255 255 255/.15) inset,0 1px 2px rgb(0 0 0/.2)}
+.btn.pri:hover{background:var(--brand-hover)}
+.btn.out{background:var(--surface);border:1px solid var(--brand-fg);color:var(--brand-fg)}
+.btn.out:hover{background:var(--tint)}
+.btn.sec{background:var(--surface);border:1px solid var(--line)}
+.btn.sec:hover{border-color:var(--edge);background:var(--sunken)}
+
+/* Backdrop page (stands in for Home) */
+.page{height:100%;display:flex;align-items:center;justify-content:center}
+
+/* Dialog */
+.scrim{position:fixed;inset:0;background:rgb(0 0 0/.45);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:60;transition:opacity .18s var(--ease)}
+.pos{position:fixed;inset:0;z-index:61;display:flex;align-items:center;justify-content:center;padding:24px}
+.dwrap{position:relative;width:100%;max-width:1152px;animation:din .2s var(--ease) both}
+@keyframes din{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.panel{max-height:calc(100svh - 48px);overflow-y:auto;border-radius:16px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow-dialog);scrollbar-width:none}
+.panel::-webkit-scrollbar{display:none}
+.body{padding:32px 24px 24px}
+/* Close: outside the card, top right, on desktop; inside below 1024px, plain icon */
+.x{position:absolute;top:0;right:-48px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--surface);color:rgb(var(--ink));box-shadow:var(--shadow-menu);z-index:3}
+.x:hover{background:var(--sunken)}
+@media (max-width:1279px){.dwrap{max-width:min(1152px,calc(100vw - 112px))}}
+@media (max-width:1023px){.dwrap{max-width:none}.x{top:12px;right:12px;width:32px;height:32px;background:none;box-shadow:none;border-radius:6px;color:var(--ink2)}.x:hover{background:var(--sunken);color:rgb(var(--ink))}}
+@media (max-width:640px){.pos{padding:12px}.panel{max-height:calc(100svh - 24px)}.body{padding:28px 16px 16px}}
+@media (max-height:700px){.pos{padding:12px 24px}.panel{max-height:calc(100svh - 24px)}.body{padding-top:24px}}
+
+/* Hero */
+.hero{max-width:896px;margin:0 auto;text-align:center}
+.hero p{margin-top:8px;text-wrap:balance}
+
+/* Segmented switch */
+.seg-row{display:flex;justify-content:center;margin-top:24px}
+.seg{position:relative;display:inline-flex;padding:2px;border-radius:6px;background:var(--sunken)}
+.seg button{position:relative;height:32px;padding:0 12px;border-radius:5px;font-size:13px;line-height:18px;font-weight:500;color:var(--ink2);transition:color .15s var(--ease)}
+.seg button:hover{color:rgb(var(--ink))}
+.seg button[aria-checked="true"]{color:rgb(var(--ink));background:var(--surface);box-shadow:0 1px 2px rgb(0 0 0/.08),0 0 0 1px var(--line)}
+.seg .save{margin-left:6px;color:var(--good)}
+
+/* Plan cards: from 768px each card spans six shared rows, so every line and button sits level */
+.cards{display:grid;gap:16px;max-width:1024px;margin:32px auto 0}
+.card{position:relative;display:flex;flex-direction:column;gap:16px;padding:20px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.card.hl{border-color:var(--brand-fg);background:var(--tint-40)}
+@media (min-width:768px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}.card{display:grid;grid-row:span 6;grid-template-rows:subgrid}}
+.tag{position:absolute;top:-12px;left:50%;transform:translateX(-50%);white-space:nowrap;border-radius:999px;padding:2px 12px;font-size:12px;line-height:16px;font-weight:600}
+.tag.fill{background:var(--brand);color:#fff}
+.tag.line{padding:1px 12px;border:1px solid var(--brand-fg);background:var(--surface);color:var(--brand-fg)}
+.price{display:flex;align-items:baseline;gap:4px}
+.cr{display:flex;flex-direction:column;gap:6px}
+.cr p{display:flex;align-items:flex-start;gap:8px}
+.cr .main{font-weight:500;color:var(--brand-fg)}
+.cr .main svg{margin-top:2px}
+.cr .use svg{margin-top:1px}
+.cr .blk{display:block}
+.list{list-style:none;margin:0;padding:16px 0 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.list li{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:18px}
+.list svg{margin-top:1px;color:var(--good)}
+
+/* Sticky plan bar */
+.sentinel{height:1px}
+.stick{position:sticky;top:0;z-index:20;height:0}
+.bar{position:absolute;left:0;right:0;top:12px;transition:opacity .2s var(--ease),transform .2s var(--ease);opacity:0;transform:translateY(-12px);pointer-events:none}
+.bar.on{opacity:1;transform:none;pointer-events:auto}
+.bar-in{max-width:1024px;margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:hidden;border-radius:12px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:var(--shadow-menu)}
+.bar-cell{display:flex;flex-direction:column;gap:8px;padding:12px 16px;min-width:0}
+.bar-cell+.bar-cell{border-left:1px solid var(--line)}
+.bar-cell.hl{background:var(--tint-60)}
+.bar-cell .nm{display:flex;align-items:center;gap:6px;font-weight:600}
+.bar-cell .dot{width:6px;height:6px;border-radius:50%;background:var(--brand)}
+.bar-cell .pr{display:flex;align-items:baseline;gap:2px;margin-top:2px}
+@media (min-width:640px){.bar-cell{flex-direction:row;align-items:center;justify-content:space-between}}
+
+/* Sections */
+.sx{margin:56px auto 0}
+.w3{max-width:768px}.w4{max-width:896px}.w5{max-width:1024px}
+.cmp-head{display:flex;width:100%;align-items:center;gap:12px;text-align:left}
+.cmp-head .dash{height:1px;flex:1;border-top:1px dashed var(--line)}
+.cmp-head svg{color:var(--ink2);transition:transform .2s var(--ease)}
+.cmp-head[aria-expanded="true"] svg{transform:rotate(180deg)}
+.tbl-wrap{margin-top:16px;overflow-x:auto;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+table{width:100%;min-width:520px;border-collapse:collapse;text-align:left}
+thead tr{background:var(--sunken)}
+th,td{padding:8px 16px}
+thead th{padding:10px 16px;font-weight:600}
+tbody tr{border-top:1px solid var(--line)}
+tbody th{font-size:13px;line-height:18px;font-weight:500;color:var(--ink2)}
+tbody td{font-size:13px;line-height:18px}
+td svg{color:var(--good)}
+
+.rates{margin-top:20px;display:grid;border-radius:12px;background:var(--sunken);padding:0 20px}
+.rates .col>div{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0}
+.rates .col>div+div{border-top:1px solid var(--line)}
+.rates .col+.col{border-top:1px solid var(--line)}
+@media (min-width:640px){.rates{grid-template-columns:1fr 1fr}.rates .col:first-child{padding-right:24px}.rates .col+.col{border-top:0;border-left:1px solid var(--line);padding-left:24px}}
+.rate{flex:none}
+.rate b{font-weight:600}
+.rate .u{color:var(--ink2)}
+.rate b.free{color:var(--good)}
+.notes{margin-top:16px;display:grid;gap:16px}
+@media (min-width:640px){.notes{grid-template-columns:1fr 1fr}}
+.note{display:flex;gap:12px;padding:16px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.note svg{color:var(--brand-fg);margin-top:2px}
+
+.guide{margin-top:20px;display:grid;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.guide>div{display:flex;flex-direction:column;gap:12px;padding:20px}
+.guide>div+div{border-top:1px solid var(--line)}
+@media (min-width:768px){.guide{grid-template-columns:repeat(3,1fr)}.guide>div+div{border-top:0;border-left:1px solid var(--line)}}
+.chip{width:36px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--tint);color:var(--brand-fg)}
+.guide .btn{margin-top:auto;align-self:flex-start}
+
+.quotes{margin-top:24px;display:grid;gap:16px}
+.quote{display:flex;flex-direction:column;gap:20px;padding:20px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+@media (min-width:768px){.quotes{grid-template-columns:repeat(3,minmax(0,1fr))}.quote{display:grid;grid-row:span 2;grid-template-rows:subgrid}}
+.quote figcaption{display:flex;align-items:flex-start;gap:12px;padding-top:16px;border-top:1px solid var(--line)}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
+
+.faq{margin-top:16px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.faq>div+div{border-top:1px solid var(--line)}
+.faq button{display:flex;width:100%;align-items:center;gap:12px;padding:14px 4px;text-align:left;font-weight:500}
+.faq button span{flex:1}
+.faq button svg{color:var(--ink2);transition:transform .2s var(--ease)}
+.faq button[aria-expanded="true"] svg{transform:rotate(180deg)}
+.faq .ans{display:flex;flex-direction:column;gap:8px;padding:0 4px 16px;color:var(--ink2)}
+
+/* Copy review */
+.review{position:sticky;bottom:12px;z-index:30;margin-top:24px;display:flex;justify-content:center;pointer-events:none}
+.review>div{pointer-events:auto;display:flex;align-items:center;gap:12px;padding:4px 16px 4px 4px;border-radius:12px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:var(--shadow-menu)}
+@media (max-width:520px){.review .t-caption{display:none}.review>div{padding-right:4px}}
+.rev-before .mk{text-decoration:underline wavy var(--bad) 2px;text-underline-offset:4px}
+.rev-after .mk{text-decoration:underline var(--good) 2px;text-underline-offset:4px}
+</style>
+</head>
+<body>
+<div class="page"><button class="btn pri" id="reopen" type="button">See plans</button></div>
+<div id="dialog">
+  <div class="scrim"></div>
+  <div class="pos">
+    <div class="dwrap" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
+      <button class="x" id="close" type="button" aria-label="Close"></button>
+      <div class="panel" id="panel"><div class="body" id="body"></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const DATA={"base":{"review":"Revised pricing page copy · INR · Dashed marks need a fact or a P1 decision before publishing","ui":{"showMarks":"Show pending marks","pending":"Pending","yes":"Yes","pendingNote":"Pending in the doc:"},"hero":{"title":"Presentations.AI Pricing","headline":"Pick a plan by how many decks you make","subhead":"Turn ideas, documents and business data into on-brand presentations you can edit in PowerPoint. Individual plans cover your own work. Gold covers your whole team on one shared allowance.","note":"Prices are shown in INR and include [[GST / exclude GST]]. All plans are billed annually."},"plans":[{"id":"basic","name":"Basic","tagline":"For a few decks a month","price":"₹375","per":"/mo","billed":"billed ₹4,500 yearly","usage":"About 3 ten-slide decks a month","body":"Enough credits for one person who builds presentations a few times a month.","includes":["4,000 credits a year (up to 400 slides)","Editable PowerPoint export","Brand Sync"],"button":"Choose Basic","monthly":{"price":"₹450","billed":"billed monthly","credits":"400 credits a month (up to 40 slides)","usage":"About 4 ten-slide decks a month"}},{"id":"pro","name":"Pro","tagline":"For people who present every week","highlight":"Best for sales leader","price":"[[₹950]]","per":"/mo","pending":"Pending P1 decision","billed":"billed [[₹11,400]] yearly","usage":"About 6 ten-slide decks a month","body":"Double the credits for sales decks, strategy reviews and reports.","includes":["8,000 credits a year (up to 800 slides)","Editable PowerPoint export","Brand Sync"],"button":"Choose Pro","monthly":{"price":"₹1,200","billed":"billed monthly","credits":"800 credits a month (up to 80 slides)","usage":"About 8 ten-slide decks a month"}},{"id":"gold","name":"Gold","tagline":"For teams","tag":"Unlimited seats","price":"[[₹9,677]]","per":"/mo","pending":"Pending","billed":"for your whole team, billed [[₹116,125]] yearly","usage":"About 50 ten-slide decks a month, shared across the team","body":"Add as many teammates as you like. Everyone draws from one credit pool, with no per-seat charge.","includes":["60,000 shared credits a year (up to 6,000 slides)","Unlimited seats","Editable PowerPoint export","Brand Sync"],"button":"Choose Gold","monthly":{"price":"₹12,000","billed":"for your whole team, billed monthly","credits":"5,000 shared credits a month (up to 500 slides)","usage":"About 50 ten-slide decks a month, shared across the team"}}],"billing":{"year":{"basic":4500,"pro":11400,"gold":116125},"month":{"basic":450,"pro":1200,"gold":12000}},"sales":{"text":"Need more than 60,000 credits or advanced enterprise features such as SSO/SAML and role-based access?","link":"Talk to sales","email":"sales@presentations.ai"},"compare":{"heading":"Compare plans","columns":["Basic","Pro","Gold"],"rows":[["Annual price","₹4,500","[[₹11,400]]","[[₹116,125]]"],["Monthly equivalent","₹375","[[₹950]]","[[₹9,677]]"],["Annual credits","4,000","8,000","60,000 shared"],["Slides per year (standard generation)","Up to 400","Up to 800","Up to 6,000"],["Seats","1","1","Unlimited"],["Editable PowerPoint export",true,true,true],["Brand Sync from your website",true,true,true]],"footnote":"Slide counts assume every credit goes to standard generation at 10 credits per slide. Other actions use credits too; see the rates below."},"credits":{"eyebrow":"Credit usage","headline":"What each credit buys","intro":"Your yearly credits cover everything you do in Presentations.AI. Here is the cost of each action under Standard Mode (default).","columns":["Action","Credits"],"rows":[["Generate a slide","10 per slide*"],["Refresh an existing presentation","10 per slide"],["Regenerate a single slide","10 per slide"],["Edit with AI","5 per action"],["Enable Deep Research","2X credits per slide"],["Generate an image","Free (included in plan)"],["Run Brand Sync","Free (included in plan)"]],"note":"Note: You can also choose Lite mode (5 credits per slide) or Premium mode (20 credits per slide) to fit your needs.","example":"Example: A 10-slide deck uses 100 credits. A 20-slide deck uses 200.","refreshTitle":"Refreshing a presentation","refreshBody":"Refresh updates a deck with new data or content. You pay 10 credits only for the slides that change.","modes":[["Lite mode","5 per slide"],["Premium mode","20 per slide"]],"makes":{"title":"What a year of credits makes","caption":"Each line spends a plan's whole year of credits on that one thing.","rows":[["Slides",10],["Slides with Deep Research",20],["Edits with AI",5],["Ten-slide decks",100]]}},"guide":{"eyebrow":"Plan guide","headline":"Which plan fits how you work","blocks":[{"id":"solo","heading":"Working on your own","body":"Start with Basic if you build a few decks a month. Move to Pro once you present every week."},{"id":"team","heading":"Working as a team","body":"Gold gives every teammate access for one price. The team shares 60,000 credits a year, so you never pay per seat."},{"id":"api","heading":"Building presentations into your product","body":"Developers and AI agents use the Presentations.AI API, which has its own credits and pricing.","link":"See API pricing"}]},"faq":{"heading":"FAQ","items":[{"q":"Is Presentations.AI free to use?","a":["Yes. The free Starter plan gives you up to 400 credits, enough for about 40 slides."]},{"q":"How much does Presentations.AI cost?","a":["Basic is ₹4,500 a year, Pro is [[₹11,400]] a year and Gold is [[₹116,125]] a year for your whole team. Prices outside India are shown in your local currency at checkout."]},{"q":"Can I pay monthly?","option":"Option A","a":["Yes. Monthly billing is available for some plans and costs 25% more per month than the annual commitment."]},{"q":"How many slides can I make on each plan?","a":["At 10 credits per slide for standard generation (default capabilities), Basic covers up to 400 slides a year, Pro up to 800 and Gold up to 6,000. Images, imports and refreshes also use credits, so your actual slide count depends on how you work. You can also choose Lite mode (5 credits per slide) or Premium mode (20 credits per slide) to fit your needs."]},{"q":"What happens if I run out of credits?","a":["You can buy top-up credits at any time. You can also upgrade to a larger plan and we credit what you have already paid. Unused credits expire at the end of your plan period."]},{"q":"Does Gold really include unlimited seats?","a":["Yes. Add as many teammates as you need at no extra cost (subject to abuse limits). Everyone shares the plan's 60,000 credits a year."]},{"q":"Can I cancel or get a refund?","a":["You can cancel your plan at any point of time - your plan stays active until the end of the billing period.","Due to the high costs involved in offering our service, there is no refund option - please use the free trial to ascertain the value of our offering before upgrading to a paid plan."],"pendingNote":"State the policy, e.g. full refund within X days of purchase; after that,"},{"q":"Do you offer plans and features for larger teams?","a":["Yes. If your team needs more than 60,000 credits a year and require advanced features like SSO/SAML and role-based access, talk to sales@presentations.ai for a custom plan."]}]},"proof":{"trust":"Trusted by over 12 million presenters","heading":"What Teams are saying","quotes":[{"text":"I really like how Presentations.ai converts my ideas into presentations instantly, removing my dependency on others. The variety of templates supports my use cases well, fitting the tags and insights perfectly. It's also very easy to set up, with a simple form to fill out, making my workspace ready smoothly and quickly.","name":"Manoj P","role":"Co-founder and Director of Strategy, The TripleDart"},{"text":"I've tried four or five AI deck tools and this is the one I actually kept using. The slides look good straight away, I can edit anything I want, and it exports cleanly to PowerPoint so it drops right into how my team already works. Great-looking decks without losing control of them.","name":"Chaitanya Chokkareddy","role":"CTO, Ozonetel"},{"text":"Perfect for business presentations. I've had a great experience with Presentations.ai. It's incredibly fast to go from a blank page to a polished presentation, and the template library gives you plenty of well-designed starting points for different use cases. One feature that really stands out is how well it handles data visualisations.","name":"Charu Pragya","role":"Founder, Public Knowledge Studio"}]},"closing":{"headline":"Make your next deck today","body":"Start free, then pick the plan that matches how often you present.","primary":"Get started free","secondary":"Compare all plans"}},"before":{"review":"Revised pricing page copy · INR · Dashed marks need a fact or a P1 decision before publishing","ui":{"showMarks":"Show pending marks","pending":"Pending","yes":"Yes","pendingNote":"Pending in the doc:"},"hero":{"title":"Presentations.AI Pricing","headline":"Pick a plan by how many decks you make","subhead":"Turn ideas, documents and business data into on-brand presentations you can edit in PowerPoint. Individual plans cover your own work. Gold covers your whole team on one shared allowance.","note":"Prices are shown in INR and include [[GST / exclude GST]]. All plans are billed annually."},"plans":[{"id":"basic","name":"Basic","tagline":"For a few decks a month","price":"₹375","per":"/mo","billed":"billed ₹4,500 yearly","usage":"About 3 ten-slide decks a month","body":"Enough credits for one person who builds presentations a few times a month.","includes":["4,000 credits a year (up to 400 slides)","Editable PowerPoint export","Brand Sync"],"button":"Choose Basic","monthly":{"price":"₹450","billed":"billed monthly","credits":"400 credits a month (up to 40 slides)","usage":"About 4 ten-slide decks a month"}},{"id":"pro","name":"Pro","tagline":"For people who present every week","highlight":"Best for sales {{leader}}","price":"[[₹950]]","per":"/mo","pending":"Pending P1 decision","billed":"billed [[₹11,400]] yearly","usage":"About 6 ten-slide decks a month","body":"Double the credits for sales decks, strategy reviews and reports.","includes":["8,000 credits a year (up to 800 slides)","Editable PowerPoint export","Brand Sync"],"button":"Choose Pro","monthly":{"price":"₹1,200","billed":"billed monthly","credits":"800 credits a month (up to 80 slides)","usage":"About 8 ten-slide decks a month"}},{"id":"gold","name":"Gold","tagline":"For teams","tag":"Unlimited seats","price":"[[₹9,677]]","per":"/mo","pending":"Pending","billed":"for your whole team, billed [[₹116,125]] yearly","usage":"About 50 ten-slide decks a month, shared across the team","body":"Add as many teammates as you like. Everyone draws from one credit pool, with no per-seat charge.","includes":["60,000 shared credits a year (up to 6,000 slides)","Unlimited seats","Editable PowerPoint export","Brand Sync"],"button":"Choose Gold","monthly":{"price":"₹12,000","billed":"for your whole team, billed monthly","credits":"5,000 shared credits a month (up to 500 slides)","usage":"About 50 ten-slide decks a month, shared across the team"}}],"billing":{"year":{"basic":4500,"pro":11400,"gold":116125},"month":{"basic":450,"pro":1200,"gold":12000}},"sales":{"text":"Need more than 60,000 credits or advanced enterprise features such as SSO/SAML and role-based access?","link":"Talk to sales","email":"sales@presentations.ai"},"compare":{"heading":"Compare plans","columns":["Basic","Pro","Gold"],"rows":[["Annual price","₹4,500","[[₹11,400]]","[[₹116,125]]"],["Monthly equivalent","₹375","[[₹950]]","[[₹9,677]]"],["Annual credits","4,000","8,000","60,000 shared"],["Slides per year (standard generation)","Up to 400","Up to 800","Up to 6,000"],["Seats","1","1","Unlimited"],["Editable PowerPoint export",true,true,true],["Brand Sync from your website",true,true,true]],"footnote":"Slide counts assume every credit goes to standard generation at 10 credits per slide. Other actions use credits too; see the rates below."},"credits":{"eyebrow":"Credit usage","headline":"What each credit buys","intro":"Your yearly credits cover everything you do in Presentations.AI. Here is the cost of each action under Standard {{Mode}} (default).","columns":["Action","Credits"],"rows":[["Generate a slide","{{10 per slide*}}"],["Refresh an existing presentation","10 per slide"],["Regenerate a single slide","10 per slide"],["Edit with AI","5 per action"],["Enable Deep Research","{{2X credits per slide}}"],["Generate an image","Free (included in plan)"],["Run Brand Sync","Free (included in plan)"]],"note":"Note: You can also choose Lite mode (5 credits per slide) or Premium mode (20 credits per slide) to fit your needs.","example":"Example: A 10-slide deck uses 100 credits. A 20-slide deck uses 200.","refreshTitle":"Refreshing a presentation","refreshBody":"Refresh updates a deck with new data or content. You pay 10 credits only for the slides that change.","modes":[["Lite mode","5 per slide"],["Premium mode","20 per slide"]],"makes":{"title":"What a year of credits makes","caption":"Each line spends a plan's whole year of credits on that one thing.","rows":[["Slides",10],["Slides with Deep Research",20],["Edits with AI",5],["Ten-slide decks",100]]}},"guide":{"eyebrow":"Plan guide","headline":"Which plan fits how you work","blocks":[{"id":"solo","heading":"Working on your own","body":"Start with Basic if you build a few decks a month. Move to Pro once you present every week."},{"id":"team","heading":"Working as a team","body":"Gold gives every teammate access for one price. The team shares 60,000 credits a year, so you never pay per seat."},{"id":"api","heading":"Building presentations into your product","body":"Developers and AI agents use the Presentations.AI API, which has its own credits and pricing.","link":"See API pricing"}]},"faq":{"heading":"FAQ","items":[{"q":"Is Presentations.AI free to use?","a":["Yes. The free Starter plan gives you up to 400 credits, enough for about 40 slides."]},{"q":"How much does Presentations.AI cost?","a":["Basic is ₹4,500 a year, Pro is [[₹11,400]] a year and Gold is [[₹116,125]] a year for your whole team. Prices outside India are shown in your local currency at checkout."]},{"q":"Can I pay monthly?","option":"Option A","a":["Yes. Monthly billing is available for some plans and costs 25% more per month than the annual commitment."]},{"q":"How many slides can I make on each plan?","a":["At 10 credits per slide for standard generation (default capabilities), Basic covers up to 400 slides a year, Pro up to 800 and Gold up to 6,000. Images, imports and refreshes also use credits, so your actual slide count depends on how you work. You can also choose Lite mode (5 credits per slide) or Premium mode (20 credits per slide) to fit your needs."]},{"q":"What happens if I run out of credits?","a":["You can buy top-up credits at any time. You can also upgrade to a larger plan and we credit what you have already paid. Unused credits expire at the end of your plan period."]},{"q":"Does Gold really include unlimited seats?","a":["Yes. Add as many teammates as you need at no extra cost (subject to abuse limits). Everyone shares the plan's 60,000 credits a year."]},{"q":"Can I cancel or get a refund?","a":["You can cancel your plan at {{any point of time - your}} plan stays active until the end of the billing period.","Due to the high costs involved in offering our service, there is no refund option{{ - please}} use the free trial to ascertain the value of our offering before upgrading to a paid plan."],"pendingNote":"State the policy, e.g. full refund within X days of purchase; after that,"},{"q":"Do you offer plans and features for larger teams?","a":["Yes. If your team needs more than 60,000 credits a year and {{require}} advanced features like SSO/SAML and role-based access, {{talk to}} sales@presentations.ai for a custom plan."]}]},"proof":{"trust":"Trusted by over 12 million presenters","heading":"What {{Teams}} are saying","quotes":[{"text":"I really like how Presentations.ai converts my ideas into presentations instantly, removing my dependency on others. The variety of templates supports my use cases well, fitting the tags and insights perfectly. It's also very easy to set up, with a simple form to fill out, making my workspace ready smoothly and quickly.","name":"Manoj P","role":"Co-founder and Director of Strategy, The TripleDart"},{"text":"I've tried four or five AI deck tools and this is the one I actually kept using. The slides look good straight away, I can edit anything I want, and it exports cleanly to PowerPoint so it drops right into how my team already works. Great-looking decks without losing control of them.","name":"Chaitanya Chokkareddy","role":"CTO, Ozonetel"},{"text":"Perfect for business presentations. I've had a great experience with Presentations.ai. It's incredibly fast to go from a blank page to a polished presentation, and the template library gives you plenty of well-designed starting points for different use cases. One feature that really stands out is how well it handles data visualisations.","name":"Charu Pragya","role":"Founder, Public Knowledge Studio"}]},"closing":{"headline":"Make your next deck today","body":"Start free, then pick the plan that matches how often you present.","primary":"Get started free","secondary":"Compare all plans"}},"after":{"review":"Revised pricing page copy · INR · Dashed marks need a fact or a P1 decision before publishing","ui":{"showMarks":"Show pending marks","pending":"Pending","yes":"Yes","pendingNote":"Pending in the doc:"},"hero":{"title":"Presentations.AI Pricing","headline":"Pick a plan by how many decks you make","subhead":"Turn ideas, documents and business data into on-brand presentations you can edit in PowerPoint. Individual plans cover your own work. Gold covers your whole team on one shared allowance.","note":"Prices are shown in INR and include [[GST / exclude GST]]. All plans are billed annually."},"plans":[{"id":"basic","name":"Basic","tagline":"For a few decks a month","price":"₹375","per":"/mo","billed":"billed ₹4,500 yearly","usage":"About 3 ten-slide decks a month","body":"Enough credits for one person who builds presentations a few times a month.","includes":["4,000 credits a year (up to 400 slides)","Editable PowerPoint export","Brand Sync"],"button":"Choose Basic","monthly":{"price":"₹450","billed":"billed monthly","credits":"400 credits a month (up to 40 slides)","usage":"About 4 ten-slide decks a month"}},{"id":"pro","name":"Pro","tagline":"For people who present every week","highlight":"Best for sales {{leaders}}","price":"[[₹950]]","per":"/mo","pending":"Pending P1 decision","billed":"billed [[₹11,400]] yearly","usage":"About 6 ten-slide decks a month","body":"Double the credits for sales decks, strategy reviews and reports.","includes":["8,000 credits a year (up to 800 slides)","Editable PowerPoint export","Brand Sync"],"button":"Choose Pro","monthly":{"price":"₹1,200","billed":"billed monthly","credits":"800 credits a month (up to 80 slides)","usage":"About 8 ten-slide decks a month"}},{"id":"gold","name":"Gold","tagline":"For teams","tag":"Unlimited seats","price":"[[₹9,677]]","per":"/mo","pending":"Pending","billed":"for your whole team, billed [[₹116,125]] yearly","usage":"About 50 ten-slide decks a month, shared across the team","body":"Add as many teammates as you like. Everyone draws from one credit pool, with no per-seat charge.","includes":["60,000 shared credits a year (up to 6,000 slides)","Unlimited seats","Editable PowerPoint export","Brand Sync"],"button":"Choose Gold","monthly":{"price":"₹12,000","billed":"for your whole team, billed monthly","credits":"5,000 shared credits a month (up to 500 slides)","usage":"About 50 ten-slide decks a month, shared across the team"}}],"billing":{"year":{"basic":4500,"pro":11400,"gold":116125},"month":{"basic":450,"pro":1200,"gold":12000}},"sales":{"text":"Need more than 60,000 credits or advanced enterprise features such as SSO/SAML and role-based access?","link":"Talk to sales","email":"sales@presentations.ai"},"compare":{"heading":"Compare plans","columns":["Basic","Pro","Gold"],"rows":[["Annual price","₹4,500","[[₹11,400]]","[[₹116,125]]"],["Monthly equivalent","₹375","[[₹950]]","[[₹9,677]]"],["Annual credits","4,000","8,000","60,000 shared"],["Slides per year (standard generation)","Up to 400","Up to 800","Up to 6,000"],["Seats","1","1","Unlimited"],["Editable PowerPoint export",true,true,true],["Brand Sync from your website",true,true,true]],"footnote":"Slide counts assume every credit goes to standard generation at 10 credits per slide. Other actions use credits too; see the rates below."},"credits":{"eyebrow":"Credit usage","headline":"What each credit buys","intro":"Your yearly credits cover everything you do in Presentations.AI. Here is the cost of each action under Standard {{mode}} (default).","columns":["Action","Credits"],"rows":[["Generate a slide","{{10 per slide}}"],["Refresh an existing presentation","10 per slide"],["Regenerate a single slide","10 per slide"],["Edit with AI","5 per action"],["Enable Deep Research","{{2x credits per slide}}"],["Generate an image","Free (included in plan)"],["Run Brand Sync","Free (included in plan)"]],"note":"Note: You can also choose Lite mode (5 credits per slide) or Premium mode (20 credits per slide) to fit your needs.","example":"Example: A 10-slide deck uses 100 credits. A 20-slide deck uses 200.","refreshTitle":"Refreshing a presentation","refreshBody":"Refresh updates a deck with new data or content. You pay 10 credits only for the slides that change.","modes":[["Lite mode","5 per slide"],["Premium mode","20 per slide"]],"makes":{"title":"What a year of credits makes","caption":"Each line spends a plan's whole year of credits on that one thing.","rows":[["Slides",10],["Slides with Deep Research",20],["Edits with AI",5],["Ten-slide decks",100]]}},"guide":{"eyebrow":"Plan guide","headline":"Which plan fits how you work","blocks":[{"id":"solo","heading":"Working on your own","body":"Start with Basic if you build a few decks a month. Move to Pro once you present every week."},{"id":"team","heading":"Working as a team","body":"Gold gives every teammate access for one price. The team shares 60,000 credits a year, so you never pay per seat."},{"id":"api","heading":"Building presentations into your product","body":"Developers and AI agents use the Presentations.AI API, which has its own credits and pricing.","link":"See API pricing"}]},"faq":{"heading":"FAQ","items":[{"q":"Is Presentations.AI free to use?","a":["Yes. The free Starter plan gives you up to 400 credits, enough for about 40 slides."]},{"q":"How much does Presentations.AI cost?","a":["Basic is ₹4,500 a year, Pro is [[₹11,400]] a year and Gold is [[₹116,125]] a year for your whole team. Prices outside India are shown in your local currency at checkout."]},{"q":"Can I pay monthly?","option":"Option A","a":["Yes. Monthly billing is available for some plans and costs 25% more per month than the annual commitment."]},{"q":"How many slides can I make on each plan?","a":["At 10 credits per slide for standard generation (default capabilities), Basic covers up to 400 slides a year, Pro up to 800 and Gold up to 6,000. Images, imports and refreshes also use credits, so your actual slide count depends on how you work. You can also choose Lite mode (5 credits per slide) or Premium mode (20 credits per slide) to fit your needs."]},{"q":"What happens if I run out of credits?","a":["You can buy top-up credits at any time. You can also upgrade to a larger plan and we credit what you have already paid. Unused credits expire at the end of your plan period."]},{"q":"Does Gold really include unlimited seats?","a":["Yes. Add as many teammates as you need at no extra cost (subject to abuse limits). Everyone shares the plan's 60,000 credits a year."]},{"q":"Can I cancel or get a refund?","a":["You can cancel your plan at {{any time. Your}} plan stays active until the end of the billing period.","Due to the high costs involved in offering our service, there is no refund option{{. Please}} use the free trial to ascertain the value of our offering before upgrading to a paid plan."],"pendingNote":"State the policy, e.g. full refund within X days of purchase; after that,"},{"q":"Do you offer plans and features for larger teams?","a":["Yes. If your team needs more than 60,000 credits a year and {{requires}} advanced features like SSO/SAML and role-based access, {{email}} sales@presentations.ai for a custom plan."]}]},"proof":{"trust":"Trusted by over 12 million presenters","heading":"What {{teams}} are saying","quotes":[{"text":"I really like how Presentations.ai converts my ideas into presentations instantly, removing my dependency on others. The variety of templates supports my use cases well, fitting the tags and insights perfectly. It's also very easy to set up, with a simple form to fill out, making my workspace ready smoothly and quickly.","name":"Manoj P","role":"Co-founder and Director of Strategy, The TripleDart"},{"text":"I've tried four or five AI deck tools and this is the one I actually kept using. The slides look good straight away, I can edit anything I want, and it exports cleanly to PowerPoint so it drops right into how my team already works. Great-looking decks without losing control of them.","name":"Chaitanya Chokkareddy","role":"CTO, Ozonetel"},{"text":"Perfect for business presentations. I've had a great experience with Presentations.ai. It's incredibly fast to go from a blank page to a polished presentation, and the template library gives you plenty of well-designed starting points for different use cases. One feature that really stands out is how well it handles data visualisations.","name":"Charu Pragya","role":"Founder, Public Knowledge Studio"}]},"closing":{"headline":"Make your next deck today","body":"Start free, then pick the plan that matches how often you present.","primary":"Get started free","secondary":"Compare all plans"}},"fixCount":9,"save":20};
+const ICONS={"sparkles": ["M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"], "chart": ["M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"], "check": ["m4.5 12.75 6 6 9-13.5"], "chev": ["m19.5 8.25-7.5 7.5-7.5-7.5"], "refresh": ["M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"], "user": ["M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"], "team": ["M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"], "code": ["M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"], "x": ["M6 18 18 6M6 6l12 12"]};
+const S={billing:"year",mode:"off",faq:0,compare:true,barOn:false};
+const icon=(k,cls)=>'<svg class="i'+(cls?" "+cls:"")+'" viewBox="0 0 24 24" aria-hidden="true">'+ICONS[k].map(d=>'<path d="'+d+'"/>').join("")+"</svg>";
+const esc=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const plain=t=>String(t).replace(/\[\[|\]\]/g,"");
+/* Text with its {{fixed}} words marked for the review's underline */
+const fx=t=>esc(plain(t)).replace(/\{\{([^}]*)\}\}/g,'<span class="mk">$1</span>');
+const hasFix=t=>String(t).includes("{{");
+const isFree=t=>/^Free/.test(t);
+function rate(v){
+  const marked=hasFix(v),clean=v.replace(/\{\{|\}\}/g,""),[amt,...unit]=clean.split(" ");
+  const inner='<b class="'+(isFree(clean)?"free":"")+'">'+esc(amt)+'</b> <span class="u">'+esc(unit.join(" "))+"</span>";
+  return '<span class="rate num">'+(marked?'<span class="mk">'+inner+"</span>":inner)+"</span>";
+}
+function forBilling(p){
+  return S.billing==="month"&&p.monthly?Object.assign({},p,{price:p.monthly.price,billed:p.monthly.billed,usage:p.monthly.usage,includes:[p.monthly.credits].concat(p.includes.slice(1))}):p;
+}
+function seg(name,value,options,label){
+  return '<div class="seg" role="radiogroup" aria-label="'+esc(label)+'">'+options.map(o=>'<button type="button" role="radio" data-'+name+'="'+o.v+'" aria-checked="'+(value===o.v)+'">'+o.l+"</button>").join("")+"</div>";
+}
+const TONES=[["#FFE3D6","#B4471B"],["#DDF3E4","#1F7A45"],["#E6E0FF","#5B3FC4"],["#FFF0C7","#8A6100"],["#DCEFFF","#0B5FA8"],["#FBE0EF","#A1306D"]];
+function avatar(name){let h=0;for(const c of name)h=(h*31+c.charCodeAt(0))>>>0;const [bg,fg]=TONES[h%TONES.length];const ini=name.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();return '<span class="av" style="background:'+bg+';color:'+fg+'" aria-hidden="true">'+esc(ini)+"</span>";}
+
+function render(){
+  const C=DATA[S.mode==="off"?"base":S.mode];
+  const plans=C.plans.map(forBilling);
+  const body=document.getElementById("body");
+  body.className="body"+(S.mode==="off"?"":" rev-"+S.mode);
+  let h="";
+  h+='<h2 class="sr" id="dlg-title">'+esc(plain(C.hero.headline))+"</h2>";
+  h+='<div class="hero"><p class="t-display" style="margin:0">'+esc(C.hero.headline)+'</p><p class="t-body-lg muted">'+esc(C.hero.subhead)+"</p></div>";
+  h+='<div class="seg-row">'+seg("bill",S.billing,[{v:"year",l:'Yearly<span class="save">Up to '+DATA.save+'% off</span>'},{v:"month",l:"Monthly"}],"Billing period")+"</div>";
+  h+='<div class="cards">';
+  plans.forEach(p=>{
+    const [cred,...rest]=p.includes;const parts=cred.split(/ (?=\(up to)/);
+    h+='<article class="card'+(p.highlight?" hl":"")+'">';
+    if(p.highlight)h+='<span class="tag fill">'+fx(p.highlight)+"</span>";
+    else if(p.tag)h+='<span class="tag line">'+fx(p.tag)+"</span>";
+    h+='<div><h3 class="t-title">'+esc(p.name)+'</h3><p class="t-caption muted" style="margin-top:4px">'+esc(p.tagline)+"</p></div>";
+    h+='<div><div class="price"><span class="t-display num">'+esc(plain(p.price))+'</span><span class="muted">'+esc(p.per)+'</span></div><p class="t-caption muted" style="margin-top:2px">'+esc(plain(p.billed))+"</p></div>";
+    h+='<button type="button" class="btn lg '+(p.highlight?"pri":"out")+'">'+esc(p.button)+"</button>";
+    h+='<div class="cr"><p class="main">'+icon("sparkles")+'<span>'+esc(parts[0])+(parts[1]?'<span class="blk">'+esc(parts[1])+"</span>":"")+'</span></p><p class="use t-caption muted">'+icon("chart")+"<span>"+esc(p.usage)+"</span></p></div>";
+    h+='<p class="t-caption muted">'+esc(p.body)+"</p>";
+    h+='<ul class="list">'+rest.map(i=>"<li>"+icon("check")+"<span>"+esc(i)+"</span></li>").join("")+"</ul>";
+    h+="</article>";
+  });
+  h+="</div>";
+  h+='<div class="sentinel" id="sentinel" aria-hidden="true"></div>';
+  h+='<div class="stick"><div class="bar'+(S.barOn?" on":"")+'" id="bar" aria-hidden="'+!S.barOn+'"><div class="bar-in">'+plans.map(p=>'<div class="bar-cell'+(p.highlight?" hl":"")+'"><div style="min-width:0"><div class="nm">'+esc(p.name)+(p.highlight?'<span class="dot" aria-hidden="true"></span>':"")+'</div><div class="pr num"><span class="t-heading">'+esc(plain(p.price))+'</span><span class="t-caption muted">'+esc(p.per)+'</span></div></div><button type="button" tabindex="'+(S.barOn?0:-1)+'" class="btn sm '+(p.highlight?"pri":"out")+'">'+esc(p.button)+"</button></div>").join("")+"</div></div></div>";
+
+  // Compare plans, open by default
+  h+='<section class="sx w4" style="margin-top:40px"><button type="button" class="cmp-head" data-act="compare" aria-expanded="'+S.compare+'"><span class="t-heading">'+esc(C.compare.heading)+'</span><span class="dash" aria-hidden="true"></span>'+icon("chev")+"</button>";
+  if(S.compare){
+    h+='<div class="tbl-wrap"><table><thead><tr><th></th>'+C.compare.columns.map(c=>"<th>"+esc(c)+"</th>").join("")+"</tr></thead><tbody>";
+    C.compare.rows.forEach(([label,...cells])=>{h+="<tr><th>"+esc(label)+"</th>"+cells.map(c=>'<td class="num">'+(c===true?icon("check")+'<span class="sr">Yes</span>':esc(plain(c)))+"</td>").join("")+"</tr>";});
+    h+='</tbody></table></div><p class="t-caption muted" style="margin-top:12px">'+esc(C.compare.footnote)+"</p>";
+  }
+  h+="</section>";
+
+  // What each credit buys: two lists that read top to bottom
+  const rows=C.credits.rows,half=Math.ceil(rows.length/2);
+  h+='<section class="sx w4"><div class="eyebrow">'+esc(C.credits.eyebrow)+'</div><h3 class="t-title" style="margin-top:6px">'+esc(C.credits.headline)+'</h3><p class="muted" style="margin-top:6px">'+fx(C.credits.intro)+"</p>";
+  h+='<div class="rates">'+[rows.slice(0,half),rows.slice(half)].map(col=>'<div class="col">'+col.map(([a,c])=>"<div><span>"+esc(a)+"</span>"+rate(c)+"</div>").join("")+"</div>").join("")+"</div>";
+  h+='<p class="t-caption muted" style="margin-top:12px">'+esc(C.credits.note)+"</p>";
+  h+='<div class="notes"><div class="note">'+icon("sparkles","l")+"<p>"+esc(C.credits.example)+'</p></div><div class="note">'+icon("refresh","l")+'<div><p style="font-weight:500">'+esc(C.credits.refreshTitle)+'</p><p class="t-caption muted" style="margin-top:2px">'+esc(C.credits.refreshBody)+"</p></div></div></div></section>";
+
+  // Plan guide
+  const GI={solo:"user",team:"team",api:"code"};
+  h+='<section class="sx w5"><div class="eyebrow">'+esc(C.guide.eyebrow)+'</div><h3 class="t-title" style="margin-top:6px">'+esc(C.guide.headline)+'</h3><div class="guide">'+C.guide.blocks.map(b=>'<div><span class="chip">'+icon(GI[b.id],"l")+'</span><div><p style="font-weight:600">'+esc(b.heading)+'</p><p class="t-caption muted" style="margin-top:4px">'+esc(b.body)+"</p></div>"+(b.link?'<button type="button" class="btn sm sec">'+esc(b.link)+"</button>":"")+"</div>").join("")+"</div></section>";
+
+  // Testimonials
+  h+='<section class="sx w5"><div class="eyebrow" style="text-align:center">'+esc(C.proof.trust)+'</div><h3 class="t-title" style="margin-top:6px;text-align:center">'+fx(C.proof.heading)+'</h3><div class="quotes">'+C.proof.quotes.map(q=>'<figure class="quote"><blockquote>“'+esc(q.text)+"”</blockquote><figcaption>"+avatar(q.name)+'<div style="min-width:0"><div class="t-caption" style="font-weight:600">'+esc(q.name)+'</div><div class="t-micro muted">'+esc(q.role)+"</div></div></figcaption></figure>").join("")+"</div></section>";
+
+  // FAQ
+  h+='<section class="sx w3"><h3 class="t-title" style="text-align:center">'+esc(C.faq.heading)+'</h3><div class="faq">'+C.faq.items.map((it,i)=>{const open=S.faq===i||it.a.some(hasFix);return '<div><button type="button" data-faq="'+i+'" aria-expanded="'+open+'"><span>'+esc(it.q)+"</span>"+icon("chev")+"</button>"+(open?'<div class="ans">'+it.a.map(p=>"<p>"+fx(p)+"</p>").join("")+"</div>":"")+"</div>";}).join("")+"</div></section>";
+
+  // Copy review pill
+  h+='<div class="review"><div>'+seg("mode",S.mode,[{v:"off",l:"Page"},{v:"before",l:"Before"},{v:"after",l:"After"}],"Copy review")+'<span class="t-caption muted">'+(S.mode==="before"?DATA.fixCount+" copy issues underlined in red":S.mode==="after"?DATA.fixCount+" copy fixes underlined in green":"Copy review: Before and After")+"</span></div></div>";
+  body.innerHTML=h;
+  watchBar();
+}
+
+let io;
+function watchBar(){
+  if(io)io.disconnect();
+  const panel=document.getElementById("panel"),el=document.getElementById("sentinel");
+  if(!el||!("IntersectionObserver" in window))return;
+  io=new IntersectionObserver(([e])=>{
+    const rb=e.rootBounds||panel.getBoundingClientRect();
+    const on=!e.isIntersecting&&e.boundingClientRect.top<rb.top+rb.height/2;
+    if(on===S.barOn)return;
+    S.barOn=on;
+    const bar=document.getElementById("bar");
+    bar.classList.toggle("on",on);bar.setAttribute("aria-hidden",String(!on));
+    bar.querySelectorAll("button").forEach(b=>b.tabIndex=on?0:-1);
+  },{root:panel,threshold:0});
+  io.observe(el);
+}
+
+document.getElementById("body").addEventListener("click",e=>{
+  const t=e.target.closest("button");if(!t)return;
+  if(t.dataset.bill){S.billing=t.dataset.bill;render();}
+  else if(t.dataset.mode){S.mode=t.dataset.mode;render();}
+  else if(t.dataset.faq!==undefined){const i=+t.dataset.faq;S.faq=S.faq===i?-1:i;render();}
+  else if(t.dataset.act==="compare"){S.compare=!S.compare;render();}
+});
+const dlg=document.getElementById("dialog");
+function setOpen(open){dlg.style.display=open?"":"none";if(open){S.barOn=false;render();document.getElementById("panel").scrollTop=0;}}
+document.getElementById("close").innerHTML=ICONS.x?icon("x","l"):"×";
+document.getElementById("close").addEventListener("click",()=>setOpen(false));
+document.getElementById("reopen").addEventListener("click",()=>setOpen(true));
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&dlg.style.display!=="none")setOpen(false);});
+const qs=new URLSearchParams(location.search);
+if(["before","after"].includes(qs.get("review")))S.mode=qs.get("review");
+setOpen(true);
+</script>
+</body>
+</html>
