@@ -107,8 +107,8 @@ svg.i.l{width:20px;height:20px}
 .price{display:flex;align-items:baseline;gap:4px}
 .cr{display:flex;flex-direction:column;gap:6px}
 .cr p{display:flex;align-items:flex-start;gap:8px}
-.cr .main{font-weight:500;color:var(--brand-fg)}
-.cr .main svg{margin-top:2px}
+.cr .cm{font-weight:500;color:var(--brand-fg)}
+.cr .cm svg{margin-top:2px}
 .cr .use svg{margin-top:1px}
 .cr .blk{display:block}
 .list{list-style:none;margin:0;padding:16px 0 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
@@ -335,7 +335,7 @@ function render(){
     h+='<div><h3 class="t-title">'+esc(p.name)+'</h3><p class="t-caption muted" style="margin-top:4px">'+esc(p.tagline)+"</p></div>";
     h+='<div><div class="price"><span class="t-display num">'+esc(plain(p.price))+'</span><span class="muted">'+esc(p.per)+'</span></div><p class="t-caption muted" style="margin-top:2px">'+esc(plain(p.billed))+"</p></div>";
     h+='<button type="button" class="btn lg '+(p.highlight?"pri":"out")+'">'+esc(p.button)+"</button>";
-    h+='<div class="cr"><p class="main">'+icon("sparkles")+'<span>'+esc(parts[0])+(parts[1]?'<span class="blk">'+esc(parts[1])+"</span>":"")+'</span></p><p class="use t-caption muted">'+icon("chart")+"<span>"+esc(p.usage)+"</span></p></div>";
+    h+='<div class="cr"><p class="cm">'+icon("sparkles")+'<span>'+esc(parts[0])+(parts[1]?'<span class="blk">'+esc(parts[1])+"</span>":"")+'</span></p><p class="use t-caption muted">'+icon("chart")+"<span>"+esc(p.usage)+"</span></p></div>";
     h+='<p class="t-caption muted" style="white-space:pre-line">'+esc(p.body)+"</p>";
     h+="</article>";
   });
