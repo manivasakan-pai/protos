@@ -37,7 +37,7 @@
         <div class="grows">${[['folder', '#14AE5C', 'Client pitches', 'users', 'Shared'], ['folder', '#FFA629', 'Drafts 2026', 'lock-simple', 'Private']].map(p => `<div class="navslot"><button class="rowitem"><i class="ph-light ph-${p[0]}" style="color:${p[1]}"></i><span class="nm">${p[2]}</span><span class="acc" data-tip="${p[4]}">${ic(p[3])}</span></button></div>`).join('')}</div>
       </div>
       <div class="side-foot">
-        <div class="plan"><div class="row"><span class="strong">Free plan</span><span class="muted">120 credits</span></div><div class="bar"><span style="width:60%"></span></div><span class="muted">120 of 200 credits left</span><button class="btn sm secondary">See plans</button></div>
+        <div class="plan"><div class="row"><span class="strong">Free plan</span><span class="muted">120 credits</span></div><div class="bar"><span style="width:60%"></span></div><span class="muted">120 of 200 credits left</span><button class="btn secondary plan-up"><svg viewBox="0 0 32 32" width="16" height="16" fill="none" aria-hidden="true"><path d="M28.79 9.73s-1.91 11.56-2.5 17.47H5.71C5.12 21.29 3.21 9.73 3.21 9.73a.92.92 0 0 1 1.23-.93l4.87 5.91a.86.86 0 0 0 1.24-.19l4.81-9.41a.83.83 0 0 1 1.28 0l4.81 9.41a.86.86 0 0 0 1.24.19l4.87-5.91a.92.92 0 0 1 1.23.93Z" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Upgrade</button></div>
         <div class="navslot"><button class="navrow" id="inviteRow">${ic('user-plus')}<span>Invite teammates</span><span class="badge gold">Gold</span></button></div>
         <div class="navslot"><button class="navrow" data-go="settings" ${current === 'Settings' ? 'aria-current="page"' : ''}>${ic('gear-six')}<span>Workspace settings</span></button></div>
       </div>

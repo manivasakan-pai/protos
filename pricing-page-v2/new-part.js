@@ -3,7 +3,8 @@
    1. Home's example-card subtitle ("Leaders are creating decks for") becomes the app's "Create decks for [group] [dice]":
       the group menu (the proto's own menu) swaps the four cards to that group's prompts, the dice shows four others.
       Leadership starts on the proto's own four cards, so Home opens exactly as before.
-   2. The sidebar plan card's button opens pricing v2 (pricing-v2.html?modal=1) over the dashboard, in a frame.
+   2. The sidebar plan card's button opens pricing v2 (pricing-v2.html?modal=1) over the dashboard, in a frame; the card itself
+      takes the app's new sidebar look (grey card, brand-outline Upgrade with the crown; build_dash.py swaps the label).
    Everything else is the proto as published. */
 (function () {
   const HP = window.HERO_PROMPT;
@@ -122,6 +123,11 @@
     ".cdf-spin{display:inline-flex;font-size:16px;transition:transform .52s cubic-bezier(.2,0,0,1)}" +
     ".hx-pcard.cdf-in{animation:cdfIn .24s cubic-bezier(.2,0,0,1) both}" +
     "@keyframes cdfIn{from{opacity:0;transform:translateY(14px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}" +
-    "@media (prefers-reduced-motion:reduce){.cdf-spin{transition:none}}";
+    "@media (prefers-reduced-motion:reduce){.cdf-spin{transition:none}}" +
+    /* Sidebar plan card as the app's new sidebar: grey card (bg-tertiary), brand-outline Upgrade with the crown */
+    ".side .plan{background:var(--color-bg-secondary)}" +
+    ".side .plan .btn.plan-up{background:var(--color-bg);box-shadow:inset 0 0 0 1px var(--color-border-brand-strong);color:var(--color-text-brand)}" +
+    ".side .plan .btn.plan-up:hover{background:var(--color-bg-brand-tertiary)}" +
+    ".side .plan .btn.plan-up svg{flex:none}";
   document.head.appendChild(css);
 })();
